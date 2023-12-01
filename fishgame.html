@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        background-image: url("public/wallpaper.webp");
+        margin: 0;
+        overflow: hidden;
+      }
+      h1 {
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- <img src="public/fish.webp" /> -->
+    <canvas id="fishgame" width="800" height="600"></canvas>
+    <script>
+      const canvas = document.getElementById("fishgame");
+      const ctx = canvas.getContext("2d");
+
+      let imgWidth = window.innerWidth / 5;
+      let imgHeight = window.innerHeight / 5;
+      const img = new Image();
+      const img2 = new Image();
+      let score = 0;
+      const fishList = [];
+
+      const resizeCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        imgWidth = window.innerWidth / 5;
+        imgHeight = window.innerHeight / 5;
+        draw();
+      };
+
+      const draw = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (const fish of fishList) {
+          if (fish[2] == false) {
+            ctx.drawImage(img, fish[0], fish[1], imgWidth, imgHeight);
+          } else {
+            ctx.drawImage(img2, fish[0], fish[1], imgWidth, imgHeight);
+          }
+        }
+        ctx.fillStyle = "white";
+        ctx.font = "48px serif";
+        ctx.fillText(`Score ${score}`, 10, 50);
+      };
+
+      const update = () => {
+        if (Math.random() < 0.005) {
+          const side = Math.random() < 0.5;
+          fishList.push([
+            side ? canvas.width : -imgWidth,
+            Math.random() * (canvas.height - imgHeight),
+            side,
+          ]);
+        }
+        for (const fish of fishList) {
+          if (fish[2] == false) {
+            if (fish[0] >= canvas.width) {
+              score = -1;
+              fishList.length = 0;
+              console.log(fish);
+              break;
+            }
+            fish[0] += 1;
+          } else {
+            if (fish[0] <= -imgWidth) {
+              score = -1;
+              fishList.length = 0;
+              console.log(fish);
+              break;
+            }
+            fish[0] -= 1;
+          }
+        }
+        draw();
+        requestAnimationFrame(update);
+      };
+
+      const handleClick = (event) => {
+        const mouseX = event.clientX;
+        const mouseY = event.clientY;
+
+        for (const fish of fishList) {
+          const x = fish[0];
+          const y = fish[1];
+          if (
+            mouseX >= x &&
+            mouseX <= x + imgWidth &&
+            mouseY >= y &&
+            mouseY <= y + imgHeight
+          ) {
+            score++;
+            const side = Math.random() < 0.5;
+            fish[0] = side ? canvas.width : -imgWidth;
+            fish[1] = Math.random() * (canvas.height - imgHeight);
+            fish[2] = side;
+          }
+        }
+        draw();
+      };
+
+      img.onload = () => {
+        resizeCanvas();
+        update();
+      };
+      img.src = "public/fish.webp";
+      img2.src = "public/fish2.webp";
+      window.addEventListener("resize", resizeCanvas, false);
+      canvas.addEventListener("click", handleClick);
+    </script>
+  </body>
+</html>
